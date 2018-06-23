@@ -12,18 +12,18 @@ This 2018 SURF(Summer Undergraduate Research Fellowships) project is based on th
 
 ## People
 
-### Supervisor
+###   Supervisor
 
 - [Dr Kyeong Soo Kim](http://kyeongsoo.github.io/) ([Department of Electrical and Electronic Engineering](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/), [XJTLU](http://www.xjtlu.edu.cn/en/) )		
 - [Dr Sanghyuk Lee](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/staff/sanghyuk-lee) ([Department of Electrical and Electronic Engineering](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/), [XJTLU](http://www.xjtlu.edu.cn/en/) )			
 
-### Research Assistant
+###   Research Assistant
 
 - Xintao Huan (E-mail: Xintao.Huan_at_xjtlu.edu.cn; PhD Candidate,  ([Department of Electrical and Electronic Engineering](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/), [XJTLU](http://www.xjtlu.edu.cn/en/) )
 
 
 
-### Meetings:
+## Meetings:
 
 - 26/6/2018: Second meeting, 2-4 PM, P515 (planned)
 - 19/06/2018: Kick-off meeting, 2-4 PM, P515
