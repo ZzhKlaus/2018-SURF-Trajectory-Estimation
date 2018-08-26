@@ -15,7 +15,7 @@ This 2018 SURF(Summer Undergraduate Research Fellowships) project is based on th
 ###   Supervisor
 
 - [Dr Kyeong Soo Kim](http://kyeongsoo.github.io/) ([Department of Electrical and Electronic Engineering](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/), [XJTLU](http://www.xjtlu.edu.cn/en/) )		
-- [Dr Sanghyuk Lee](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/staff/sanghyuk-lee) ([Department of Electrical and Electronic Engineering](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/), [XJTLU](http://www.xjtlu.edu.cn/en/) )			
+	 [Dr Sanghyuk Lee](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/staff/sanghyuk-lee) ([Department of Electrical and Electronic Engineering](http://www.xjtlu.edu.cn/en/departments/academic-departments/electrical-and-electronic-engineering/), [XJTLU](http://www.xjtlu.edu.cn/en/) )			
 
 ###   Research Assistant
 
@@ -25,7 +25,8 @@ This 2018 SURF(Summer Undergraduate Research Fellowships) project is based on th
 
 ## Meetings:
 
-- 26/6/2018: Second meeting, 2-4 PM, P515 (planned)
+- 11/07/2018: 4th meeting, 2-4 PM, IR515(the CeSGIC Lab) (planned)
+- 26/06/2018: Third meeting, 2-7 PM, P515 
 - 19/06/2018: Kick-off meeting, 2-4 PM, P515
 - 25/05/2018: Preparation meeting, 5-6 PM, IR515
 
