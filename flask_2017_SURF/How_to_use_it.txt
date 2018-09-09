@@ -1,3 +1,0 @@
-cmd中输入ipconfig，找到当前网络的IPv4地址，并在源代码中修改
-
-type "ipconfig"  in "cmd", find "IPv4 address", replace default address with it.

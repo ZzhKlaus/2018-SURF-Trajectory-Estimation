@@ -1,33 +1,47 @@
+#Use scikit-learn to grid search the batch size and epochs
 import csv
 import os
 import numpy as np
 import pandas as pd
 from standard_plots import *
+from sklearn.grid_search import GridSearchCV
+from keras.wrappers.scikit_learn import KerasClassifier
+from math import sqrt
+from sklearn.metrics import mean_squared_error
 
+from keras.layers import Input
+from keras.models import model_from_json, load_model
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential, Model
-from keras.layers import Dense, LSTM, Dropout, Embedding, Input, Activation, Bidirectional, TimeDistributed
+from keras.layers import Dense, LSTM, Dropout, Embedding, Input, Activation, Bidirectional, TimeDistributed, RepeatVector, Flatten
 from keras.optimizers import Adam
+from keras.utils import plot_model
 from sklearn.preprocessing import MinMaxScaler
 
 import matplotlib.pyplot as plt
 
-import theano
-#import tensorflow
+#import theano
+import tensorflow
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+resultpath = "result"
 
 #Parameters
 time_steps = 1
-#学习率
+#Learning rate
 learning_rate = 0.001 
-#迭代次数
-epochs = 200
-#每块训练样本数
-batch_size = 20
-#LSTM Cell
-n_hidden = 128
-#类别
+#ephochs
+#epochs = 200
+#bach sizes
+#batch_size = 20
+#LSTM Cell units
+n_hidden = 2
+#features
 n_classes = 3
+#time steps 
+look_back = 20
+
+#hidden_nodes = 128
 
 
 adam = Adam(lr=learning_rate)
@@ -44,43 +58,43 @@ with open('waypoint_trace_new.csv', 'r', newline='') as csvfile:
 
 
 # convert an array of values into a dataset matrix
-def create_dataset_input(dataset, look_back=1):
-    dataX = []
-    for i in range(len(dataset)-look_back):
-        dataX.append(dataset[i:(i+look_back)])
-    return np.array(dataX)
+def create_dataset_input(dataset, look_back=look_back):
+	dataX = []
+	for i in range(len(dataset)-look_back):
+		dataX.append(dataset[i:(i+look_back)])
+	return np.array(dataX)
 
-def create_dataset_output(dataset, look_back=1):
-    dataY = []
-    for i in range(len(dataset)-look_back):
-        dataY.append(dataset[i + look_back])
-    return  np.array(dataY)
+def create_dataset_output(dataset, look_back=look_back):
+	dataY = []
+	for i in range(len(dataset)-look_back):
+		dataY.append(dataset[i + look_back])
+	return  np.array(dataY)
 
-def load_data(file_name, sequence_length=20, split=0.75):
+def load_data(file_name, batch_size, split=0.75, look_back = look_back):
 	Loc_x = pd.read_csv(file_name, sep=',', usecols=[0])
 	Loc_x = np.array(Loc_x).astype(float)
-	scaler = MinMaxScaler()
-	Loc_x = scaler.fit_transform(Loc_x)
+	scaler_loc_x = MinMaxScaler()
+	Loc_x = scaler_loc_x.fit_transform(Loc_x)
 
 	Loc_y = pd.read_csv(file_name, sep=',', usecols=[1])
 	Loc_y = np.array(Loc_y).astype(float)
-	scaler = MinMaxScaler()
-	Loc_y = scaler.fit_transform(Loc_y)
+	scaler_loc_y = MinMaxScaler()
+	Loc_y = scaler_loc_y.fit_transform(Loc_y)
 
 	Mag_x = pd.read_csv(file_name, sep=',', usecols=[3])
 	Mag_x = np.array(Mag_x).astype(float)
-	scaler = MinMaxScaler()
-	Mag_x = scaler.fit_transform(Mag_x)
+	scaler_mag_x = MinMaxScaler()
+	Mag_x = scaler_mag_x.fit_transform(Mag_x)
 
 	Mag_y = pd.read_csv(file_name, sep=',', usecols=[4])
 	Mag_y = np.array(Mag_y).astype(float)
-	scaler = MinMaxScaler()
-	Mag_y = scaler.fit_transform(Mag_y)
+	scaler_mag_y = MinMaxScaler()
+	Mag_y = scaler_mag_y.fit_transform(Mag_y)
 
 	Mag_z = pd.read_csv(file_name, sep=',', usecols=[5])
 	Mag_z = np.array(Mag_z).astype(float)
-	scaler = MinMaxScaler()
-	Mag_z = scaler.fit_transform(Mag_z)
+	scaler_mag_z = MinMaxScaler()
+	Mag_z = scaler_mag_z.fit_transform(Mag_z)
 
 	train_size = int(len(Mag_x) * split)
 	test_size = len(Mag_x) - train_size
@@ -90,190 +104,388 @@ def load_data(file_name, sequence_length=20, split=0.75):
 	train_mag_y, test_mag_y = Mag_y[0:train_size], Mag_y[train_size:len(Mag_y)]
 	train_mag_z, test_mag_z = Mag_z[0:train_size], Mag_z[train_size:len(Mag_z)]
 	
+	print('shapeX:',train_mag_x.shape)
+	train_mag_x = create_dataset_input(train_mag_x, look_back = look_back)
+	print('shapeX:',train_mag_x.shape)
+	train_mag_y = create_dataset_input(train_mag_y, look_back = look_back)
+	train_mag_z = create_dataset_input(train_mag_z, look_back = look_back)
+
+	
+	test_mag_x = create_dataset_input(test_mag_x, look_back = look_back)
+	test_mag_y = create_dataset_input(test_mag_y, look_back = look_back)
+	test_mag_z = create_dataset_input(test_mag_z, look_back = look_back)
+	
+	#print('trian_mag_x:',train_mag_x)
+	
+	train_loc_x = create_dataset_input(train_loc_x, look_back = look_back)
+	train_loc_y = create_dataset_input(train_loc_y, look_back = look_back)
+	test_loc_x = create_dataset_input(test_loc_x, look_back = look_back)
+	test_loc_y = create_dataset_input(test_loc_y, look_back = look_back)
+	
 	#train_loc_x, test_loc_x = train_loc_x[:,:,np.newaxis], test_loc_x[:,:,np.newaxis]
 	#train_loc_y, test_loc_y = train_loc_y[:,:,np.newaxis], test_loc_y[:,:,np.newaxis]
-	train_mag_x, test_mag_x = train_mag_x[:,:,np.newaxis], test_mag_x[:,:,np.newaxis]
-	train_mag_y, test_mag_y = train_mag_y[:,:,np.newaxis], test_mag_y[:,:,np.newaxis]
-	train_mag_z, test_mag_z = train_mag_z[:,:,np.newaxis], test_mag_z[:,:,np.newaxis]
-	
+	#train_mag_x, test_mag_x = train_mag_x[:,:,np.newaxis], test_mag_x[:,:,np.newaxis]
+	#train_mag_y, test_mag_y = train_mag_y[:,:,np.newaxis], test_mag_y[:,:,np.newaxis]
+	#train_mag_z, test_mag_z = train_mag_z[:,:,np.newaxis], test_mag_z[:,:,np.newaxis]
 
-	'''
-	train_mag_x = create_dataset_input(train_mag_x, 1)
-	#train_mag_x = np.reshape(train_mag_x, (len(train_mag_x),len(train_mag_x[0])))
-	train_mag_y = create_dataset_input(train_mag_y, 1)
-	#train_mag_y = np.reshape(train_mag_y, (len(train_mag_y),len(train_mag_y[0])))
-	train_mag_z = create_dataset_input(train_mag_z, 1)
-	#train_mag_z = np.reshape(train_mag_z, (len(train_mag_z),len(train_mag_z[0])))
-	
-	test_mag_x = create_dataset_input(test_mag_x, look_back)
-	test_mag_y = create_dataset_input(test_mag_y, look_back)
-	test_mag_z = create_dataset_input(test_mag_z, look_back)
-	
-
-	train_loc_x = create_dataset_input(train_loc_x, look_back)
-	train_loc_y = create_dataset_input(train_loc_y, look_back)
-	test_loc_x = create_dataset_input(test_loc_x, look_back)
-	test_loc_y = create_dataset_input(test_loc_y, look_back)
-	'''
 	trainX = np.concatenate((train_mag_x,train_mag_y,train_mag_z),axis = 2)
 	testX = np.concatenate((test_mag_x,test_mag_y,test_mag_z),axis = 2)
-	trainY = np.concatenate((train_loc_x,train_loc_y),axis = 1)
-	testY = np.concatenate((test_loc_x,test_loc_y),axis = 1)
-	print(trainX.shape)
-	print(trainX[0][0])
+	print('train_loc_x.shape:',train_loc_x.shape)
+	trainY = np.concatenate((train_loc_x,train_loc_y),axis = 2)
+	testY = np.concatenate((test_loc_x,test_loc_y),axis = 2)
+	trainY = np.reshape(trainY, (len(trainY),look_back,2))
+	print('trianY:',trainY.shape)
+	#print('trianX:',trainX)
 	print(trainX[0][0][0])
-	return trainX,trainY,testX,testY
-	
-def build_model(batch_size = 20, time_steps = 1, feature_size = 3):
-	# input_dim是输入的train_x的最后一个维度，train_x的维度为(n_samples, time_steps, input_dim)
-	model = Sequential()
-	#model.add(LSTM(120,batch_input_shape = (batch_size, time_steps, feature_size), stateful = True, return_sequences=True))
-	
-	# Dense(2 : outputs two value per timestep
+	lengthTrain = len(trainX)
+	lengthTest = len(testX)
+	while(lengthTrain % batch_size != 0):
+		lengthTrain -= 1
+	while(lengthTest % batch_size != 0):
+		lengthTest -= 1
 
+
+	return scaler_loc_x,scaler_loc_y,trainX[0:lengthTrain],trainY[0:lengthTrain],testX[0:lengthTest],testY[0:lengthTest]
+	#,scaler_mag_x,scaler_mag_y,scaler_mag_z
+
+def build_model(hidden_nodes,batch_size , time_steps = look_back, feature_size = 3):
+	# input_dim是输入的train_x的最后一个维度，train_x的维度为(n_samples, time_steps, input_dim)
+	
+	#define model
+	inputs1 = Input(batch_shape = (batch_size,look_back,feature_size))
+	lstm1, state_h, state_c = LSTM(hidden_nodes, stateful = True, return_sequences=True, return_state=True)(inputs1)
+	lstm1 = Dropout(0.2)(lstm1)
+	#lstm1 =  RepeatVector(20)(lstm1)
+	lstm1 = LSTM(hidden_nodes,return_sequences=True)(lstm1)
+	
+	#lstm1 = LSTM(120)(lstm1)
+	lstm1 = Dropout(0.2)(lstm1)
+	'''
+	lstm1 = LSTM(hidden_nodes,return_sequences=True)(lstm1)
+	lstm1 = Dropout(0.2)(lstm1)
+	lstm1 = LSTM(hidden_nodes,return_sequences=True)(lstm1)
+	lstm1 = Dropout(0.2)(lstm1)
+	'''
+	lstm1 = TimeDistributed(Dense((2)))(lstm1)
+	model = Model(input = inputs1, outputs = lstm1)
+	
+	'''
+	#Sequencial model 
+	model = Sequential()
+	model.add(LSTM(120,batch_input_shape = (batch_size, time_steps, feature_size), stateful = True, return_sequences=True))
+	model.add(Dropout(0.2))
+	model.add(Dense(2))
+	'''
+
+
+	#Dense(2 : outputs two value per timestep
+	'''
 	model.add(Bidirectional(LSTM(n_hidden, stateful = True, return_sequences=True),batch_input_shape = (batch_size, time_steps, feature_size)))
 	model.add(Bidirectional(LSTM(n_hidden)))
-	#TimeDistributed: Why cannot use it, return input_shape
-	model.add(Dense(2))
+	'''
+	'''
+	model.add(Bidirectional(LSTM(n_hidden, stateful = True, return_sequences=True),batch_input_shape = (batch_size, time_steps, feature_size)))
+	model.add(Bidirectional(LSTM(n_hidden)))
+	'''
+	#model.add(LSTM(2, stateful = True, return_sequences=True, return_state=True,batch_input_shape = (batch_size, look_back, feature_size)))
+	
+	
 
+	#model.add(Dropout(0.2))
+	#model.add(RepeatVector(10))
+	#model.add(LSTM(n_hidden,return_sequences=True))
+	#model.add(Dropout(0.2))
+	#TimeDistributed: Why cannot use it, return input_shape
+	#model.add(Flatten())
+	#model.add(Dense(2)) #, activation='tanh'
+	
 	#model.add(Bidirectional(LSTM(200, stateful = True, return_sequences=True),batch_input_shape = (batch_size, time_steps, feature_size)))
 	#model.add(LSTM(6, input_dim=1, return_sequences=True))
 	#model.add(LSTM(6, input_shape=(None, 1),return_sequences=True))
 
-	"""
-	#model.add(LSTM(input_dim=1, output_dim=6,input_length=10, return_sequences=True))
-	#model.add(LSTM(6, input_dim=1, input_length=10, return_sequences=True))
-	model.add(LSTM(6, input_shape=(10, 1),return_sequences=True))
-	"""
-	model.add(Dropout(2))
-	print(model.layers)
-	#model.add(LSTM(100, return_sequences=True))
-	#model.add(LSTM(100, return_sequences=True))
-	#model.add(LSTM(60, return_sequences=True))
-	#model.add(Dropout(0.3))
 	
-	#model.add(LSTM(30))
-	#model.add(Dropout(0.3))
+	
+	print(model.layers)
+	model.compile(loss='mean_squared_error', optimizer=adam,metrics=['acc'])
+	#metrics.mae, metrics.sparse_categorical_accuracy])
+
+	model.summary()
+
 	
 	#model.add(Dense(n_classes))
 	#model.add(Activation('softmax'))
 	#model.add(Activation('linear'))
 
-	model.summary()
-	model.compile(loss='mean_squared_error', optimizer=adam,metrics=['acc'])
-	#metrics.mae, metrics.sparse_categorical_accuracy])
 	return model
 
+# make a one-step forecast
+def forecast_lstm(model, batch_size, X):
+	X = X.reshape(batch_size, look_back, 3)
+	yhat = model.predict(X, batch_size=batch_size)
+	return yhat#[0,0]
+
+# inverse scaling for a forecasted value
+def invert_scale(scaler, yhat):
+	#new_row = [x for x in X] + [yhat]
+	#array = numpy.array(new_row)
+	#array = array.reshape(1, len(array))
+	inverted = scaler.inverse_transform(yhat)
+	return inverted[:]
+
+# invert differenced value
+def inverse_difference(history, yhat, interval=1):
+	return yhat + history[-interval]
+
+def train_model(hidden_nodes,batch_size,epochs,file_structure,file_acc2loss):
+	scaler_loc_x,scaler_loc_y,train_x, train_y, test_x, test_y = load_data(file_name = 'waypoint_trace_new.csv', batch_size = batch_size)
+	#,scaler_mag_x,scaler_mag_y,scaler_mag_z
+	#For funtional API
+	#model,hidden_state = build_model(batch_size=batch_size)
+
+	#For Sequencial()
+	model = build_model(hidden_nodes,batch_size=batch_size)
+	
+	#draw the model structure
+	plot_model(model, show_shapes=True,to_file=os.path.join(resultpath, file_structure))
+
+	# input data to model and train
+	print('train_x.shape:',train_x.shape)
+
+	print('train_y.shape:',train_y.shape)
+	print('test_x.shape:',test_x.shape) 
+	print('test_y.shape:',test_y.shape)
+	for i in range(epochs):
+		history = model.fit(train_x, train_y, batch_size=batch_size, epochs = 1, verbose=1,shuffle = False) #validation_split=0.1, validation_data=(test_x, test_y)
+		model.reset_states()
+		#print('hidden_state:',hidden_state)
+		# list all data in history
+		'''
+		print('history.keys()',hist.history.keys())
+		# summarize history for accuracy
+		plt.plot(hist.history['acc'])
+		plt.plot(hist.history['val_acc'])
+		plt.title('model accuracy')
+		plt.ylabel('accuracy')
+		plt.xlabel('epoch')
+		plt.legend(['train', 'test'], loc='upper left')
+		plt.show()
+		'''
+		print('Real Epoches:',i+1)
+
+		with open(file_acc2loss,'a', newline='') as csvfile:
+			if not os.path.getsize(file_acc2loss):        #file is empty
+				spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_NONE)
+				spamwriter.writerow(['epochs','loss','acc'])#, 'val_loss','val_acc' 
+				
+			data = ([
+				i,history.history['loss'][0],history.history['acc'][0]#, history.history['val_loss'][0], history.history['val_acc'][0]
+				])  
+			spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_NONE)
+			spamwriter.writerow(data)
+		
+	'''	
+	# evaluate the model
+	loss, acc = model.evaluate(test_x, test_y,batch_size=batch_size, verbose=0)
+	print('Test Score: ', loss)
+	print('Test Accuracy: ', acc)
+	results = [loss,acc]
+	new = pd.DataFrame(results)
+	#new.to_csv('loss2acc.csv', header = 0)
+	with open('loss2acc.csv', 'a') as f:
+ 		new.to_csv(f, header=False)
+
+ 	'''	
+
+	#predict = model.predict(test_x)
+	#predict = np.reshape(predict, (predict.size, ))
+	'''
+	predictions = list()
+	for i in range(int(len(test_x))):
+		#predict
+		
+		yhat = forecast_lstm(model, batch_size=1,X = test_x[i])
+		print('test_y:',test_y[i])
+		print('Time:',i,'yhat:',yhat)
+		#invert scaling	
+		print('yhat.shape:',yhat.shape)	
+		print('yhat.type:',type(yhat))
+		yhat_loc_x = invert_scale(scaler_loc_x,yhat[:,:,0])
+
+		yhat_loc_x = np.reshape(yhat_loc_x,(len(yhat_loc_x[0]), 1))
+		#yhat_loc_x = yhat_loc_x[:,:,np.newaxis]
+		yhat_loc_y = invert_scale(scaler_loc_y,yhat[:,:,1])
+		yhat_loc_y = np.reshape(yhat_loc_y,(len(yhat_loc_y[0]), 1))
+		#yhat_loc_y = yhat_loc_y[:,:,np.newaxis]
 
 
-def train_model(train_x, train_y, test_x, test_y):
-	model = build_model()
 
-	try:
-		model.fit(train_x, train_y, batch_size=20, epochs = epochs, verbose=1, validation_data=(test_x, test_y),shuffle = False) #validation_split=0.1
-		#model.reset_states()
-		trainScore = model.evaluate(train_x, train_y,batch_size=20, verbose=0)
-		print('Train Score: ',trainScore)
-		testScore = model.evaluate(test_x, test_y,batch_size=20, verbose=0)
-		print('Test Score: ', testScore[0])
-		print('Test Accuracy: ', testScore[1])
-		#predict = model.predict(test_x)
-		#predict = np.reshape(predict, (predict.size, ))
-	except KeyboardInterrupt:
-		#print(predict)
-		print(test_y)
-	#print(predict)
-	print(test_y)
-	try:
-		fig = plt.figure(1)
-		#plt.plot(predict, 'r:')
-		plt.plot(test_y, 'g-')
-		plt.legend(['predict', 'true'])
-	except Exception as e:
-		print(e)
-	return   test_y #predict,
+		test_raw_loc_x = invert_scale(scaler_loc_x,test_x[:,:,0])
 
+		test_raw_loc_x = np.reshape(test_raw_loc_x[i],(len(test_raw_loc_x[1]), 1))
+		#test_raw_loc_x = test_raw_loc_x[:,:,np.newaxis]
+		test_raw_loc_y = invert_scale(scaler_loc_y,test_x[:,:,1])
+		test_raw_loc_y = np.reshape(test_raw_loc_y[i],(len(test_raw_loc_y[1]), 1))
+		#test_raw_loc_y = test_raw_loc_y[:,:,np.newaxis]
+		#report performance
+		test_raw_loc = np.concatenate((test_raw_loc_x,test_raw_loc_y),axis = 1)
+		yhat_loc = np.concatenate((yhat_loc_x,yhat_loc_y),axis = 1)
 
-trainX, trainY, testX, testY = load_data('waypoint_trace_new.csv')
-test_y = train_model(trainX, trainY, testX, testY) #predict_y, 
+		rmse = sqrt(mean_squared_error(test_raw_loc,yhat_loc))
+		print(rmse)
+		print('%d)Test RMSE: %.3f'% (i+1,rmse))
+	'''
+	'''
+		print('yhat_loc_x:',yhat_loc_x)
+		print('yhat_loc_y:',yhat_loc_y)
+		print('test_raw_loc_x:',test_raw_loc_x)
+		print('test_raw_loc_y:',test_raw_loc_y)
+		'''
+		#print('yhat_x:',yhat_x)
+		#print('yhat_y:',yhat_y)
+		#print('test_y:',test_y[i])
+			#predictions.append(yhat)
+	return model 
 
+def my_save_model(hidden_nodes,batch_size,epochs,file_structure,file_acc2loss,file_model):
+	model = train_model(hidden_nodes,batch_size,epochs,file_structure,file_acc2loss)
+	model.save(os.path.join(resultpath, file_model))
+	print('Model have been saved to my_model.h5')
 
+def my_load_model():
+	# test data
 
-'''
-trainLocX = create_dataset_output(train_loc_x,look_back)
-trainLocY = create_dataset_output(train_loc_y,look_back)
-testLocX = create_dataset_output(test_loc_x,look_back)
-testLocY = create_dataset_output(test_loc_y,look_back)
+	batch_size =  20
 
-trainMagX = create_dataset_input(train_mag_x,look_back)
-trainMagY = create_dataset_input(train_mag_y,look_back)
-trainMagZ = create_dataset_input(train_mag_z,look_back)
-testMagX = create_dataset_input(test_mag_x,look_back)
-testMagY = create_dataset_input(test_mag_y,look_back)
-testMagZ = create_dataset_input(test_mag_z,look_back)
-'''
-'''
-trainX = np.array([trainMagX,trainMagY,trainMagZ])
-#trainX = np.reshape(trainX,(trainMagX.shape[0], trainMagX.shape[1]))
-trainY = np.array([train_loc_x,train_loc_y])
-testX = np.array([testMagX,testMagY,testMagZ])
-testY = np.array([testLocX,testLocY])
+	scaler_loc_x,scaler_loc_y,train_x, train_y, test_x, test_y = load_data(file_name = 'waypoint_trace_new.csv', batch_size = batch_size)
+	
+	print(len(test_x))
+	print(len(test_y))
+	print(len(test_x)/batch_size)
+	model2 = load_model(os.path.join(resultpath, 'my_model_256_10_30.h5'))
+	print("Load model successfully!")
+	model2.compile(loss='mean_squared_error', optimizer=adam,metrics=['acc'])
+	print("Compile model successfully!")
+	'''
+	test_loss, test_acc = model2.evaluate(test_x, test_y, batch_size=batch_size,verbose=0)
+	print('Test loss:', test_loss)
+	print('Test accuracy:', test_acc)
+	'''
 
-print(trainX.shape)
-print(trainY.shape)
-'''
-'''
-trainMagX = np.reshape(trainMagX, (trainMagX.shape[0], trainMagX.shape[1], 1))
-testMagX = np.reshape(testMagX, (testMagX.shape[0], testMagX.shape[1], 1))
-trainMagY = np.reshape(trainMagY, (trainMagY.shape[0], trainMagY.shape[1], 1))
+	predictions = list()
+	for i in range(int(len(test_x)/batch_size)):
+		#predict
+		print('%d / %d:' % (i,int(len(test_x)/batch_size)))
+		yhat = forecast_lstm(model2, batch_size=batch_size,X = test_x[i*batch_size:(i+1)*batch_size])
+		'''
+		print('test_y:',test_y[i])
+		print('Time:',i,'yhat:',yhat)
+		#invert scaling	
+		print('yhat.shape:',yhat.shape)	
+		print('yhat.type:',type(yhat))
+		'''
+		yhat_loc_x = invert_scale(scaler_loc_x,yhat[:,:,0])
 
-testMagY = np.reshape(testMagY, (testMagY.shape[0], testMagY.shape[1], 1))
-trainMagZ = np.reshape(trainMagZ, (trainMagZ.shape[0], trainMagZ.shape[1], 1))
-testMagZ = np.reshape(testMagZ, (testMagZ.shape[0], testMagZ.shape[1], 1))
-'''
-
-
-
-
-
-
-
-
-
-'''
-model.add(LSTM(32,input_shape=(1,3)))
-model.add(Dropout(0.3))
-model.add(Dense(2))
-model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, epochs=100, batch_size=batch_size, verbose=2)
-'''
-'''
-trainScore = model.evaluate(trainX, trainY, batch_size=batch_size, verbose=0)
-print('Train Score: ', trainScore)
-testScore = model.evaluate(testX, testY, batch_size=batch_size, verbose=0)
-print('Test Score: ', testScore)
-'''
+		yhat_loc_x = np.reshape(yhat_loc_x,(batch_size,len(yhat_loc_x[0])))
+		#yhat_loc_x = yhat_loc_x[:,:,np.newaxis]
+		yhat_loc_y = invert_scale(scaler_loc_y,yhat[:,:,1])
+		yhat_loc_y = np.reshape(yhat_loc_y,(batch_size,len(yhat_loc_y[0])))
+		#yhat_loc_y = yhat_loc_y[:,:,np.newaxis]
 
 
-'''
-theano.config.compute_test_value = "ignore"
-# create and fit the LSTM network
-batch_size = 1
-model = Sequential()
-model.add(LSTM(32,input_dim=3))
-model.add(Dropout(0.3))
-model.add(Dense(1))
-model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, nb_epoch=100, batch_size=batch_size, verbose=2)
 
-model = Sequential()
+		test_raw_loc_x = invert_scale(scaler_loc_x,test_x[:,:,0])
 
-model.add(LSTM(128, batch_input_shape = (batch_size, 1, 3), stateful = True, return_sequences = True))
-model.add(Dropout(0.3))
+		test_raw_loc_x = np.reshape(test_raw_loc_x[i*batch_size:(i+1)*batch_size],(batch_size,len(test_raw_loc_x[1])))
+		#test_raw_loc_x = test_raw_loc_x[:,:,np.newaxis]
+		test_raw_loc_y = invert_scale(scaler_loc_y,test_x[:,:,1])
+		test_raw_loc_y = np.reshape(test_raw_loc_y[i*batch_size:(i+1)*batch_size],(batch_size,len(test_raw_loc_y[1])))
+		#test_raw_loc_y = test_raw_loc_y[:,:,np.newaxis]
+		#report performance
+		#test_raw_loc = np.concatenate((test_raw_loc_x,test_raw_loc_y),axis = 2)
+		#yhat_loc = np.concatenate((yhat_loc_x,yhat_loc_y),axis = 2)
 
-model.add(LSTM(128, batch_input_shape = (batch_size, 1, 3), stateful = True))
-model.add(Dropout(0.3))
+		yhat_loc_x = pd.DataFrame(yhat_loc_x)
+		yhat_loc_y = pd.DataFrame(yhat_loc_y)
+		test_raw_loc_x = pd.DataFrame(test_raw_loc_x)
+		test_raw_loc_y = pd.DataFrame(test_raw_loc_y)
+		'''
+		if not os.path.isfile('test_raw_loc_x.csv'):
+			test_raw_loc_x.to_csv('test_raw_loc_x.csv', header=0)
+		else: # else it exists so append without writing the header
+			test_raw_loc_x.to_csv('test_raw_loc_x.csv', mode='a', header=False)
 
-model.add(Dense(2))
+		if not os.path.isfile('test_raw_loc_y.csv'):
+			test_raw_loc_y.to_csv('test_raw_loc_y.csv', header=0)
+		else: # else it exists so append without writing the header
+			test_raw_loc_y.to_csv('test_raw_loc_y.csv', mode='a', header=False)
+		'''
+		
+		if not os.path.isfile('yhat_loc_x.csv'):
+			yhat_loc_x.to_csv('yhat_loc_x.csv', header=0)
+		else: # else it exists so append without writing the header
+			yhat_loc_x.to_csv('yhat_loc_x.csv', mode='a', header=False)
 
-'''
+		if not os.path.isfile('yhat_loc_y.csv'):
+			yhat_loc_y.to_csv('yhat_loc_y.csv', header=0)
+		else: # else it exists so append without writing the header
+			yhat_loc_y.to_csv('yhat_loc_y.csv', mode='a', header=False)
+		
+		'''
+		print('test_raw_loc:',test_raw_loc)
+		print('yhat_loc:',yhat_loc)
+		
+		rmse = sqrt(mean_squared_error(test_raw_loc,yhat_loc))
+		print(rmse)
+		print('%d)Test RMSE: %.3f'% (i+1,rmse))
+		'''
+	'''
+		print('yhat_loc_x:',yhat_loc_x)
+		print('yhat_loc_y:',yhat_loc_y)
+		print('test_raw_loc_x:',test_raw_loc_x)
+		print('test_raw_loc_y:',test_raw_loc_y)
+		'''
+		#print('yhat_x:',yhat_x)
+		#print('yhat_y:',yhat_y)
+		#print('test_y:',test_y[i])
+			#predictions.append(yhat)
+
+	#y = model2.predict_classes(test_x)
+	#print("predict is: ", y)
+
+def main():
+	'''
+	scaler_loc_x,scaler_loc_y,trainX, trainY, test_x, test_y = load_data('waypoint_trace_new.csv')
+	model = KerasClassifier(build_fn=build_model, verbose=0)
+	batch_size = [1]#, 20, 50, 100, 200]
+	epochs = [10]#,30, 50, 100,200, 300]qa
+	param_grid = dict(batch_size=batch_size, nb_epoch=epochs)
+	grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1)
+	print('Xshape:',trainX.shape)
+	print('Yshape:',trainY.shape)
+	grid_result = grid.fit(trainX, trainY)
+	# summarize results
+	print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+	for params, mean_score, scores in grid_result.grid_scores_:
+		print("%f (%f) with: %r" % (scores.mean(), scores.std(), params))
+
+	best_batchsize =  int(grid_result.best_params_['batch_size'])
+	best_epoch =  int(grid_result.best_params_['nb_epoch'])
+	print('best_batchsize:',best_batchsize)
+	print('best_epoch:',best_epoch)
+	'''
+
+	'''
+	hidden_nodes = 256
+	best_batchsize =  5
+	best_epoch =  100 
+	file_structure = 'model_ts=30_256_5_100.png'
+	file_acc2loss =    'log_ts=30_256_5_100.csv'
+	file_model =  'my_model_ts=30_256_5_100.h5'
+	my_save_model(hidden_nodes,best_batchsize,best_epoch,file_structure,file_acc2loss,file_model)
+	'''
+	my_load_model()
+
+	#change dropout rate, look back, change model structure
+
+if __name__ == "__main__":
+	main()
