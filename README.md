@@ -84,11 +84,11 @@ Although the deteacting data varies when changing the pose of device at one poin
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/floor_4.png)
 
-<center> **4th floor**</center> 
+ **4th floor**
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/floor_5.png)
 
-<center> **5th floor**</center> 
+ **5th floor** 
 
 ### Training data: Random waypoint model
 
@@ -102,7 +102,7 @@ For training data, considering the special characteristic that despite very stab
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/model_ts=30_hn=128_bs=5_ep=100.png)
 
-<center>**model structure**</center>
+**model structure**
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/diff_hidden_nodes.png)
 
