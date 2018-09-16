@@ -62,7 +62,7 @@ While WiFi and IMU data were collected together, for one measurement of each poi
 
 (Drawn by Zhe (Tim) Tang )
 
-We collected two areas in 4th and 5th floors of IBSS, XJTLU. The total area is around 300 ${m^2}$ . 
+We collected two areas in 4th and 5th floors of IBSS, XJTLU. The total area is around 300 $m^2$  . 
 
 ### Study on geomagnetic field by different devices on one path 
 
@@ -96,7 +96,7 @@ For training data, considering the special characteristic that despite very stab
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/tra.png)
 
-<center>**random waypoint model**</center>
+**random waypoint model**
 
 ### Training the LSTM network
 
@@ -106,23 +106,23 @@ For training data, considering the special characteristic that despite very stab
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/diff_hidden_nodes.png)
 
-<center>Training accuracy with different hidden nodes</center>
+Training accuracy with different hidden nodes
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/diff_batch_size.png)
 
-<center>Training accuracy with different batch size</center>
+Training accuracy with different batch size
 
 
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/diff_time_steps.png)
 
-<center>Training accuracy with different time steps</center>
+Training accuracy with different time steps
 
 ![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/error_LSTM_all.png)
 
 
 
-<center>**Evaluation error based on 25,000 points**</center>
+**Evaluation error based on 25,000 points**
 
 
 
