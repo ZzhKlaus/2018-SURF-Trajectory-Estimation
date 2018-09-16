@@ -58,7 +58,7 @@ While WiFi and IMU data were collected together, for one measurement of each poi
 
 ### Data collection 
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\Location_Of_Data.jpg)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/Location_Of_Data.jpg)
 
 (Drawn by Zhe (Tim) Tang )
 
@@ -66,7 +66,7 @@ We collected two areas in 4th and 5th floors of IBSS, XJTLU. The total area is a
 
 ### Study on geomagnetic field by different devices on one path 
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\4Y_3.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/4Y_3.png)
 
 We found that although the detecting data at one point varies a lot for different devices, the characteristic of changing patterns along one path are very similar.
 
@@ -74,7 +74,7 @@ We found that although the detecting data at one point varies a lot for differen
 
 ### Study on geomagnetic field by different poses of one device
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\ori.PNG)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/ori.PNG)
 
 Although the deteacting data varies when changing the pose of device at one point,  the changing patterns along one path are similar, two. 
 
@@ -82,11 +82,11 @@ Although the deteacting data varies when changing the pose of device at one poin
 
 ### The geomagnetic field map for two floors
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\floor_4.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/floor_4.png)
 
 <center> **4th floor**</center> 
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\floor_5.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/floor_5.png)
 
 <center> **5th floor**</center> 
 
@@ -94,31 +94,31 @@ Although the deteacting data varies when changing the pose of device at one poin
 
 For training data, considering the special characteristic that despite very stable spatially, there are many points with same geomagnetic field intensity, which limits the usage as fingerprint like Wi-Fi signal (where the mac address is unique). We generated a long path of 10,000 steps based on random waypoint model, for both training and evaluation (0.75:0.25).
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\tra.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/tra.png)
 
 <center>**random waypoint model**</center>
 
 ### Training the LSTM network
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\model_ts=30_hn=128_bs=5_ep=100.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/model_ts=30_hn=128_bs=5_ep=100.png)
 
 <center>**model structure**</center>
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\diff_hidden_nodes.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/diff_hidden_nodes.png)
 
 <center>Training accuracy with different hidden nodes</center>
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\diff_batch_size.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/diff_batch_size.png)
 
 <center>Training accuracy with different batch size</center>
 
 
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\diff_time_steps.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/diff_time_steps.png)
 
 <center>Training accuracy with different time steps</center>
 
-![](C:\GitHub_files\2018-SURF-Trajectory-Estimation\img\error_LSTM_all.png)
+![](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/raw/master/img/error_LSTM_all.png)
 
 
 
