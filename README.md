@@ -31,7 +31,7 @@ This 2018 SURF(Summer Undergraduate Research Fellowships) project is based on th
 
 ### Android mobile phone and coordination system
 
-![**Android mobile phone and coordination system**](img\axisdevice.png)
+![**Android mobile phone and coordination system**](https://github.com/ZzhKlaus/2018-SURF-Trajectory-Estimation/tree/master/img/axisdevice.png)
 
 We used two android mobile phones for collecting Wi-Fi fingerprinting as well as IMU data, for IMU, these data were collected: Geomagnetic field intensity in (x,y,z) coordination, pose direction of phones (pitch, roll, yaw), accelaration data in (x,y,z) coordination.
 
