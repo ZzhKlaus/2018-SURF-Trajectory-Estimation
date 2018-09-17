@@ -1,4 +1,6 @@
 '''
+By Zhenghang(Klaus) Zhong
+
 Assuming in a small indoor space, relationship between space and geomagnetic field intensity is linear
 
 Interpolation method is used for two purpose:
