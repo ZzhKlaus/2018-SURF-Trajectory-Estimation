@@ -27,7 +27,7 @@ This 2018 SURF(Summer Undergraduate Research Fellowships) project is based on th
 
 ## Meetings:
 
-- Please refer to the project homepage, [Trajectory Estimation of Mobile Users/Devices based on Wi-Fi Fingerprinting and Deep Neural Networks](http://kyeongsoo.github.io/research/projects/trajectory_estimation/index.html), with presentation materials.
+- Please refer to the project homepage, [Trajectory Estimation of Mobile Users/Devices based on Wi-Fi Fingerprinting and Deep Neural Networks](http://kyeongsoo.github.io/research/projects/surf-201830/index.html), with presentation materials.
 
 
 
