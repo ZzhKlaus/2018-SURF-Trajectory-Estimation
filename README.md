@@ -10,7 +10,7 @@ p.s. The algorithm code is preserved untill workshop paper accepted.
 
 ## Background
 
-This 2018 SURF(Summer Undergraduate Research Fellowships) project is based on the last year's SURF of [Indoor Localization  Based on Wi-Fi Fingerprinting](http://kyeongsoo.github.io/research/projects/indoor_localization/index.html) and will go deeper in two directions, one is **advanced DNN-based indoor localization** (including CNN-based approaches); the other is **RNN-based (LSTM) trajectory estimation**.
+This 2018 SURF(Summer Undergraduate Research Fellowships) project is based on the last year's SURF of [Indoor Localization  Based on Wi-Fi Fingerprinting](http://kyeongsoo.github.io/research/projects/surf-201739/index.html) and will go deeper in two directions, one is **advanced DNN-based indoor localization** (including CNN-based approaches); the other is **RNN-based (LSTM) trajectory estimation**.
 
 
 
